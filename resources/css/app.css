@@ -1,2 +1,5 @@
 /* Bootstrap 5 */
-@import "bootstrap/dist/css/bootstrap.min.css";
+@import "node_modules/bootstrap/dist/css/bootstrap.min.css";
+@import "public/css/fontawesome.css";
+@import "public/css/brands.css";
+@import "public/css/solid.css";
