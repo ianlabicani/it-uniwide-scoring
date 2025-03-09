@@ -16,11 +16,17 @@ class CompetitionController extends Controller
         return view('admin.competitions.index', compact('competitions'));
     }
 
-    // public function show($id)
-    // {
-    //     $competition = Competition::with('criteria', 'judges', 'contestants')->findOrFail($id);
-    //     return view('admin.competitions.show', compact('competition'));
-    // }
+    public function show($id)
+    {
+        $competition = Competition::with([
+            'judges',
+            'contestants',
+            'criteria',
+        ])->findOrFail($id);
+
+        return view('admin.competitions.show', compact('competition'));
+    }
+
 
     public function create()
     {
@@ -60,7 +66,7 @@ class CompetitionController extends Controller
         $competition->contestants()->attach($request->contestants);
 
 
-        return redirect()->route('admin.competitions.index')->with('success', 'Competition created successfully');
+        return redirect()->route('admin.competitions.show', $competition->id)->with('success', 'Competition created successfully');
     }
 
 
@@ -100,7 +106,7 @@ class CompetitionController extends Controller
             }
         }
 
-        return redirect()->route('admin.competitions.index')->with('success', 'Competition updated successfully.');
+        return redirect()->route('admin.competitions.show', $competition->id)->with('success', 'Competition updated successfully.');
     }
 
 

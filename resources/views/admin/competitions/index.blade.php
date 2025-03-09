@@ -45,6 +45,9 @@
                                     onclick="deleteCompetition({{ $competition->id }}, '{{ $competition->name }}')">
                                     <i class="fas fa-trash"></i> Delete
                                 </button>
+                                <a href="{{ route('admin.competitions.show', $competition->id) }}" class="btn btn-sm btn-info">
+                                    <i class="fas fa-eye"></i> View
+                                </a>
                             </td>
                         </tr>
                     @empty
