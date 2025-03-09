@@ -1,4 +1,5 @@
 <?php
+use App\Http\Controllers\Admin\CompetitionController;
 use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -12,5 +13,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth',])->group(function ()
 
     Route::post('/users/add-judge', [UserController::class, 'addJudge'])->name('users.addJudge');
     Route::resource('users', UserController::class);
+    Route::resource('competitions', CompetitionController::class);
+
 });
 

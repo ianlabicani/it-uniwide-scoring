@@ -14,6 +14,9 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{{ route('admin.users.index') }}">Users</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ route('admin.competitions.index') }}">Competitions</a>
+                </li>
 
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"

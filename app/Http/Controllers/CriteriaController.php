@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Competition;
-use App\Http\Requests\StoreCompetitionRequest;
-use App\Http\Requests\UpdateCompetitionRequest;
+use App\Models\Criteria;
+use App\Http\Requests\StoreCriteriaRequest;
+use App\Http\Requests\UpdateCriteriaRequest;
 
-class CompetitionController extends Controller
+class CriteriaController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -27,7 +27,7 @@ class CompetitionController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreCompetitionRequest $request)
+    public function store(StoreCriteriaRequest $request)
     {
         //
     }
@@ -35,7 +35,7 @@ class CompetitionController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Competition $competition)
+    public function show(Criteria $criteria)
     {
         //
     }
@@ -43,7 +43,7 @@ class CompetitionController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Competition $competition)
+    public function edit(Criteria $criteria)
     {
         //
     }
@@ -51,7 +51,7 @@ class CompetitionController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateCompetitionRequest $request, Competition $competition)
+    public function update(UpdateCriteriaRequest $request, Criteria $criteria)
     {
         //
     }
@@ -59,7 +59,7 @@ class CompetitionController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Competition $competition)
+    public function destroy(Criteria $criteria)
     {
         //
     }

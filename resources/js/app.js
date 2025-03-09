@@ -1,4 +1,4 @@
 import "./bootstrap";
+import * as bootstrap from "bootstrap"; // ✅ This is important
 
-// bootstrap 5
-import "bootstrap";
+window.bootstrap = bootstrap; // ✅ This will make bootstrap globally available
