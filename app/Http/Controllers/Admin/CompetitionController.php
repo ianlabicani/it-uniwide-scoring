@@ -59,11 +59,18 @@ class CompetitionController extends Controller
         $competition->update($request->only('name', 'date', 'location', 'description'));
         $competition->criteria()->delete();
 
-        foreach ($request->criteria as $criterion) {
+        $criteria = $request->criteria;
+
+        if (!$criteria) {
+            $criteria = [];
+        }
+
+
+        foreach ($criteria as $criterion) {
             $competition->criteria()->create($criterion);
         }
 
-        return redirect()->route('admin.competitions.index')->with('success', 'Competition updated successfully');
+        return redirect()->route('admin.competitions.edit', $competition->id)->with('success', 'Competition updated successfully');
     }
 
     public function destroy(Competition $competition)

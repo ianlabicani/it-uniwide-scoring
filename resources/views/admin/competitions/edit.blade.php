@@ -50,6 +50,7 @@
                             </button>
                         </div>
                     </div>
+
                 @endforeach
             </div>
 
@@ -75,22 +76,22 @@
             const container = document.getElementById('criteria-container');
 
             const html = `
-                            <div class="row mb-2 criterion-item">
-                                <div class="col-md-6">
-                                    <label class="form-label">Criteria Name</label>
-                                    <input type="text" name="criteria[${criterionIndex}][name]" class="form-control" required>
+                                <div class="row mb-2 criterion-item">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Criteria Name</label>
+                                        <input type="text" name="criteria[${criterionIndex}][name]" class="form-control" required>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">Percentage (%)</label>
+                                        <input type="number" name="criteria[${criterionIndex}][percentage]" class="form-control" min="1" max="100" required>
+                                    </div>
+                                    <div class="col-md-2 d-flex align-items-end">
+                                        <button type="button" class="btn btn-danger btn-sm" onclick="this.closest('.criterion-item').remove()">
+                                            <i class="fas fa-trash"></i> Remove
+                                        </button>
+                                    </div>
                                 </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">Percentage (%)</label>
-                                    <input type="number" name="criteria[${criterionIndex}][percentage]" class="form-control" min="1" max="100" required>
-                                </div>
-                                <div class="col-md-2 d-flex align-items-end">
-                                    <button type="button" class="btn btn-danger btn-sm" onclick="this.closest('.criterion-item').remove()">
-                                        <i class="fas fa-trash"></i> Remove
-                                    </button>
-                                </div>
-                            </div>
-                        `;
+                            `;
 
             container.insertAdjacentHTML('beforeend', html);
             criterionIndex++;
