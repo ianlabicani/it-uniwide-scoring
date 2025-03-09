@@ -2,14 +2,14 @@
 
 @section('admin-content')
     <div class="container mt-4">
-        <h4 class="mb-3">Edit Competition</h4>
+        <h4>Edit Competition</h4>
 
         <form action="{{ route('admin.competitions.update', $competition->id) }}" method="POST">
             @csrf
             @method('PUT')
 
             <div class="mb-3">
-                <label for="name" class="form-label">Name</label>
+                <label for="name" class="form-label">Competition Name</label>
                 <input type="text" name="name" class="form-control" value="{{ $competition->name }}" required>
             </div>
 
@@ -24,84 +24,83 @@
             </div>
 
             <div class="mb-3">
-                <label for="description" class="form-label">Description (Optional)</label>
-                <textarea name="description" class="form-control" rows="4">{{ $competition->description }}</textarea>
+                <label for="description" class="form-label">Description</label>
+                <textarea name="description" class="form-control">{{ $competition->description }}</textarea>
             </div>
 
+            {{-- Judges --}}
+            <div class="mb-3">
+                <label for="judges" class="form-label">Assign Judges</label>
+                <select name="judges[]" class="form-control" multiple>
+                    @foreach($judges as $judge)
+                        <option value="{{ $judge->id }}" {{ $competition->judges->contains($judge->id) ? 'selected' : '' }}>
+                            {{ $judge->name }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            {{-- Criteria --}}
             <h5>Criteria</h5>
             <div id="criteria-container">
-                @foreach($competition->criteria as $criterion)
-                    <div class="row mb-2 criterion-item">
-                        <input type="hidden" name="criteria[{{ $loop->index }}][id]" value="{{ $criterion->id }}">
-                        <div class="col-md-6">
-                            <label class="form-label">Criteria Name</label>
-                            <input type="text" name="criteria[{{ $loop->index }}][name]" class="form-control"
-                                value="{{ $criterion->name }}" required>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Percentage (%)</label>
-                            <input type="number" name="criteria[{{ $loop->index }}][percentage]" class="form-control"
-                                value="{{ $criterion->percentage }}" min="1" max="100" required>
-                        </div>
-                        <div class="col-md-2 d-flex align-items-end">
-                            <button type="button" class="btn btn-danger btn-sm"
-                                onclick="removeCriterion(this, {{ $criterion->id }})">
-                                <i class="fas fa-trash"></i> Remove
+                @foreach ($competition->criteria as $index => $criterion)
+                    <div class="criteria-item">
+                        <div class="input-group mb-2">
+                            <input type="hidden" name="criteria[{{ $index }}][id]" value="{{ $criterion->id }}">
+                            <input type="text" name="criteria[{{ $index }}][name]" class="form-control"
+                                value="{{ $criterion->name }}" placeholder="Criteria Name" required>
+                            <input type="number" name="criteria[{{ $index }}][percentage]" class="form-control"
+                                value="{{ $criterion->percentage }}" placeholder="Percentage" required>
+                            <button type="button" class="btn btn-danger remove-criteria">
+                                <i class="fas fa-trash"></i>
                             </button>
                         </div>
                     </div>
-
                 @endforeach
             </div>
 
-            <button type="button" class="btn btn-primary btn-sm mt-3" onclick="addCriterion()">
+            <button type="button" class="btn btn-secondary mb-3" id="add-criteria">
                 <i class="fas fa-plus"></i> Add Criteria
             </button>
 
-            <div class="d-flex justify-content-end mt-4">
-                <a href="{{ route('admin.competitions.index') }}" class="btn btn-secondary me-2">
-                    <i class="fas fa-arrow-left"></i> Back
-                </a>
-                <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-save"></i> Update Competition
-                </button>
-            </div>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> Save Changes
+            </button>
         </form>
     </div>
 
-    <script>
-        let criterionIndex = {{ $competition->criteria->count() }};
-
-        function addCriterion() {
-            const container = document.getElementById('criteria-container');
-
-            const html = `
-                                <div class="row mb-2 criterion-item">
-                                    <div class="col-md-6">
-                                        <label class="form-label">Criteria Name</label>
-                                        <input type="text" name="criteria[${criterionIndex}][name]" class="form-control" required>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label class="form-label">Percentage (%)</label>
-                                        <input type="number" name="criteria[${criterionIndex}][percentage]" class="form-control" min="1" max="100" required>
-                                    </div>
-                                    <div class="col-md-2 d-flex align-items-end">
-                                        <button type="button" class="btn btn-danger btn-sm" onclick="this.closest('.criterion-item').remove()">
-                                            <i class="fas fa-trash"></i> Remove
-                                        </button>
-                                    </div>
-                                </div>
-                            `;
-
-            container.insertAdjacentHTML('beforeend', html);
-            criterionIndex++;
-        }
-
-        function removeCriterion(button, criterionId) {
-            // Mark it as deleted
-            button.closest('.criterion-item').remove();
-            const input = `<input type="hidden" name="deleted_criteria[]" value="${criterionId}">`;
-            document.querySelector('form').insertAdjacentHTML('beforeend', input);
-        }
-    </script>
 @endsection
+
+@push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            let criteriaIndex = {{ $competition->criteria->count() }};
+
+            document.getElementById('add-criteria').addEventListener('click', function () {
+                const container = document.getElementById('criteria-container');
+                const newCriteria = `
+                        <div class="criteria-item">
+                            <div class="input-group mb-2">
+                                <input type="hidden" name="criteria[${criteriaIndex}][id]" value="">
+                                <input type="text" name="criteria[${criteriaIndex}][name]" class="form-control"
+                                    placeholder="Criteria Name" required>
+                                <input type="number" name="criteria[${criteriaIndex}][percentage]" class="form-control"
+                                    placeholder="Percentage" required>
+                                <button type="button" class="btn btn-danger remove-criteria">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                container.insertAdjacentHTML('beforeend', newCriteria);
+                criteriaIndex++;
+            });
+
+            document.getElementById('criteria-container').addEventListener('click', function (event) {
+                if (event.target.classList.contains('remove-criteria')) {
+                    event.target.closest('.criteria-item').remove();
+                }
+            });
+        });
+    </script>
+@endpush

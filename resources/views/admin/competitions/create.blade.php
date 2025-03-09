@@ -2,109 +2,93 @@
 
 @section('admin-content')
     <div class="container mt-4">
-        <h4>Add Competition</h4>
+        <h4>Create Competition</h4>
 
         <form action="{{ route('admin.competitions.store') }}" method="POST">
             @csrf
 
             <div class="mb-3">
-                <label>Name</label>
-                <input type="text" name="name" class="form-control @error('name') is-invalid @enderror"
-                    value="{{ old('name') }}" required>
-                @error('name')
-                    <div class="text-danger">{{ $message }}</div>
-                @enderror
+                <label for="name" class="form-label">Competition Name</label>
+                <input type="text" name="name" class="form-control" required>
             </div>
 
             <div class="mb-3">
-                <label>Date</label>
-                <input type="date" name="date" class="form-control @error('date') is-invalid @enderror"
-                    value="{{ old('date') }}" required>
-                @error('date')
-                    <div class="text-danger">{{ $message }}</div>
-                @enderror
+                <label for="date" class="form-label">Date</label>
+                <input type="date" name="date" class="form-control" required>
             </div>
 
             <div class="mb-3">
-                <label>Location</label>
-                <input type="text" name="location" class="form-control @error('location') is-invalid @enderror"
-                    value="{{ old('location') }}" required>
-                @error('location')
-                    <div class="text-danger">{{ $message }}</div>
-                @enderror
+                <label for="location" class="form-label">Location</label>
+                <input type="text" name="location" class="form-control" required>
             </div>
 
             <div class="mb-3">
-                <label>Description</label>
-                <textarea name="description"
-                    class="form-control @error('description') is-invalid @enderror">{{ old('description') }}</textarea>
-                @error('description')
-                    <div class="text-danger">{{ $message }}</div>
-                @enderror
+                <label for="description" class="form-label">Description</label>
+                <textarea name="description" class="form-control"></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label for="judges" class="form-label">Assign Judges</label>
+                <select name="judges[]" class="form-control" multiple>
+                    @foreach($judges as $judge)
+                        <option value="{{ $judge->id }}">{{ $judge->name }}</option>
+                    @endforeach
+                </select>
             </div>
 
             <h5>Criteria</h5>
-            <div id="criteria-list">
-                @if(old('criteria'))
-                    @foreach(old('criteria') as $index => $criterion)
-                        <div class="input-group mb-2">
-                            <input type="text" name="criteria[{{ $index }}][name]"
-                                class="form-control @error("criteria.{$index}.name") is-invalid @enderror"
-                                placeholder="Criteria Name" value="{{ $criterion['name'] }}" required>
-                            <input type="number" name="criteria[{{ $index }}][percentage]"
-                                class="form-control @error("criteria.{$index}.percentage") is-invalid @enderror" placeholder="%"
-                                value="{{ $criterion['percentage'] }}" required>
-                            <button type="button" class="btn btn-danger" onclick="removeCriteria(this)">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                            @error("criteria.{$index}.name")
-                                <div class="text-danger">{{ $message }}</div>
-                            @enderror
-                            @error("criteria.{$index}.percentage")
-                                <div class="text-danger">{{ $message }}</div>
-                            @enderror
-                        </div>
-                    @endforeach
-                @else
+            <div id="criteria-container">
+                <div class="criteria-item">
                     <div class="input-group mb-2">
-                        <input type="text" name="criteria[0][name]" class="form-control" placeholder="Criteria Name" required>
-                        <input type="number" name="criteria[0][percentage]" class="form-control" placeholder="%" required>
-                        <button type="button" class="btn btn-danger" onclick="removeCriteria(this)">
+                        <input type="text" name="criteria[0][name]" class="form-control" placeholder="Criteria Name"
+                            required>
+                        <input type="number" name="criteria[0][percentage]" class="form-control" placeholder="Percentage"
+                            required>
+                        <button type="button" class="btn btn-danger remove-criteria">
                             <i class="fas fa-trash"></i>
                         </button>
                     </div>
-                @endif
+                </div>
             </div>
-
-            <button type="button" class="btn btn-primary mb-3" onclick="addCriteria()">
+            <button type="button" class="btn btn-secondary mb-3" id="add-criteria">
                 <i class="fas fa-plus"></i> Add Criteria
             </button>
 
-            <button type="submit" class="btn btn-success">
-                <i class="fas fa-save"></i> Save
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> Save Competition
             </button>
         </form>
     </div>
 
-    <script>
-        let criteriaCount = {{ old('criteria') ? count(old('criteria')) : 1 }};
-
-        function addCriteria() {
-            let html = `
-                    <div class="input-group mb-2">
-                        <input type="text" name="criteria[\${criteriaCount}][name]" class="form-control" placeholder="Criteria Name" required>
-                        <input type="number" name="criteria[\${criteriaCount}][percentage]" class="form-control" placeholder="%" required>
-                        <button type="button" class="btn btn-danger" onclick="removeCriteria(this)">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                `;
-            document.getElementById('criteria-list').insertAdjacentHTML('beforeend', html);
-            criteriaCount++;
-        }
-
-        function removeCriteria(button) {
-            button.closest('.input-group').remove();
-        }
-    </script>
 @endsection
+
+@push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            let criteriaIndex = 1;
+
+            document.getElementById('add-criteria').addEventListener('click', function () {
+                const container = document.getElementById('criteria-container');
+                const newCriteria = `
+                        <div class="criteria-item">
+                            <div class="input-group mb-2">
+                                <input type="text" name="criteria[${criteriaIndex}][name]" class="form-control" placeholder="Criteria Name" required>
+                                <input type="number" name="criteria[${criteriaIndex}][percentage]" class="form-control" placeholder="Percentage" required>
+                                <button type="button" class="btn btn-danger remove-criteria">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                container.insertAdjacentHTML('beforeend', newCriteria);
+                criteriaIndex++;
+            });
+
+            document.getElementById('criteria-container').addEventListener('click', function (event) {
+                if (event.target.classList.contains('remove-criteria')) {
+                    event.target.closest('.criteria-item').remove();
+                }
+            });
+        });
+    </script>
+@endpush
