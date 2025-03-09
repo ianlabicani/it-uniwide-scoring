@@ -13,9 +13,8 @@
 </head>
 
 <body>
-    <main>
-        @yield('content')
-    </main>
+    @yield('content')
+    @yield('scripts')
 </body>
 
 </html>
