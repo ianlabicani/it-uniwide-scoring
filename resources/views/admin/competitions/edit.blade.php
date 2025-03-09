@@ -29,15 +29,35 @@
             </div>
 
             {{-- Judges --}}
-            <div class="mb-3">
-                <label for="judges" class="form-label">Assign Judges</label>
-                <select name="judges[]" class="form-control" multiple>
-                    @foreach($judges as $judge)
-                        <option value="{{ $judge->id }}" {{ $competition->judges->contains($judge->id) ? 'selected' : '' }}>
-                            {{ $judge->name }}
-                        </option>
-                    @endforeach
-                </select>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="judges" class="form-label">Assign Judges</label>
+                        <select name="judges[]" class="form-control" multiple>
+                            @foreach($judges as $judge)
+                                <option value="{{ $judge->id }}"
+                                    {{ $competition->judges->contains($judge->id) ? 'selected' : '' }}>
+                                    {{ $judge->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+
+                {{-- Contestants --}}
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="contestants" class="form-label">Assign Contestants</label>
+                        <select name="contestants[]" class="form-control" multiple>
+                            @foreach($contestants as $contestant)
+                                <option value="{{ $contestant->id }}"
+                                    {{ $competition->contestants->contains($contestant->id) ? 'selected' : '' }}>
+                                    {{ $contestant->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
             </div>
 
             {{-- Criteria --}}

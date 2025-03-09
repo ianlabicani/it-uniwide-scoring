@@ -27,13 +27,28 @@
                 <textarea name="description" class="form-control"></textarea>
             </div>
 
-            <div class="mb-3">
-                <label for="judges" class="form-label">Assign Judges</label>
-                <select name="judges[]" class="form-control" multiple>
-                    @foreach($judges as $judge)
-                        <option value="{{ $judge->id }}">{{ $judge->name }}</option>
-                    @endforeach
-                </select>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="judges" class="form-label">Assign Judges</label>
+                        <select name="judges[]" class="form-control" multiple>
+                            @foreach($judges as $judge)
+                                <option value="{{ $judge->id }}">{{ $judge->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="contestants" class="form-label">Assign Contestants</label>
+                        <select name="contestants[]" class="form-control" multiple>
+                            @foreach($contestants as $contestant)
+                                <option value="{{ $contestant->id }}">{{ $contestant->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
             </div>
 
             <h5>Criteria</h5>
@@ -70,16 +85,16 @@
             document.getElementById('add-criteria').addEventListener('click', function () {
                 const container = document.getElementById('criteria-container');
                 const newCriteria = `
-                        <div class="criteria-item">
-                            <div class="input-group mb-2">
-                                <input type="text" name="criteria[${criteriaIndex}][name]" class="form-control" placeholder="Criteria Name" required>
-                                <input type="number" name="criteria[${criteriaIndex}][percentage]" class="form-control" placeholder="Percentage" required>
-                                <button type="button" class="btn btn-danger remove-criteria">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                        </div>
-                    `;
+                                    <div class="criteria-item">
+                                        <div class="input-group mb-2">
+                                            <input type="text" name="criteria[${criteriaIndex}][name]" class="form-control" placeholder="Criteria Name" required>
+                                            <input type="number" name="criteria[${criteriaIndex}][percentage]" class="form-control" placeholder="Percentage" required>
+                                            <button type="button" class="btn btn-danger remove-criteria">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                `;
                 container.insertAdjacentHTML('beforeend', newCriteria);
                 criteriaIndex++;
             });

@@ -16,9 +16,17 @@ class UserController extends Controller
      */
     public function index()
     {
-        $users = User::with('roles:id,name')->get(['id', 'name', 'email']);
-        return view('admin.users.index', compact('users'));
+        $judges = User::whereHas('roles', function ($query) {
+            $query->where('name', 'judge');
+        })->get(['id', 'name', 'email']);
+
+        $contestants = User::whereHas('roles', function ($query) {
+            $query->where('name', 'contestant');
+        })->get(['id', 'name', 'email']);
+
+        return view('admin.users.index', compact('judges', 'contestants'));
     }
+
 
 
 
@@ -103,5 +111,30 @@ class UserController extends Controller
 
         return redirect()->route('admin.users.index')->with('success', 'Judge added successfully!');
     }
+
+    public function addContestant(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|min:6',
+        ]);
+
+        // ✅ Create User
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+        ]);
+
+        // ✅ Automatically Assign the "Judge" Role
+        $role = Role::where('name', 'contestant')->first();
+        if ($role) {
+            $user->roles()->attach($role->id);
+        }
+
+        return redirect()->route('admin.users.index')->with('success', 'Contestant added successfully!');
+    }
+
 
 }

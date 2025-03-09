@@ -16,13 +16,23 @@ class CompetitionController extends Controller
         return view('admin.competitions.index', compact('competitions'));
     }
 
+    // public function show($id)
+    // {
+    //     $competition = Competition::with('criteria', 'judges', 'contestants')->findOrFail($id);
+    //     return view('admin.competitions.show', compact('competition'));
+    // }
+
     public function create()
     {
         $judges = User::whereHas('roles', function ($query) {
             $query->where('name', 'judge');
         })->get();
 
-        return view('admin.competitions.create', compact('judges'));
+        $contestants = User::whereHas('roles', function ($query) {
+            $query->where('name', 'contestant');
+        })->get();
+
+        return view('admin.competitions.create', compact('judges', 'contestants'));
     }
 
     public function store(Request $request)
@@ -47,6 +57,8 @@ class CompetitionController extends Controller
 
         // Attach the judges to the competition
         $competition->judges()->attach($request->judges);
+        $competition->contestants()->attach($request->contestants);
+
 
         return redirect()->route('admin.competitions.index')->with('success', 'Competition created successfully');
     }
@@ -58,51 +70,39 @@ class CompetitionController extends Controller
         $judges = User::whereHas('roles', function ($query) {
             $query->where('name', 'judge');
         })->get();
+        $contestants = User::whereHas('roles', function ($query) {
+            $query->where('name', 'contestant');
+        })->get();
 
-        return view('admin.competitions.edit', compact('competition', 'judges'));
+        return view('admin.competitions.edit', compact('competition', 'judges', 'contestants'));
     }
 
-    public function update(Request $request, $id)
-    {
-        $request->validate([
-            'name' => 'required',
-            'date' => 'required',
-            'location' => 'required',
-            'description' => 'nullable',
-            'criteria.*.name' => 'required',
-            'criteria.*.percentage' => 'required|numeric|min:1|max:100',
-            'judges' => 'required|array',
-        ]);
 
-        $competition = Competition::findOrFail($id);
+    public function update(Request $request, Competition $competition)
+    {
         $competition->update($request->only('name', 'date', 'location', 'description'));
 
         // Sync judges
         $competition->judges()->sync($request->judges);
 
-        // Handle criteria
+        // Sync contestants
+        $competition->contestants()->sync($request->contestants);
+
+        // Update or create criteria
         foreach ($request->criteria as $criterionData) {
-            if (isset($criterionData['id']) && $criterionData['id'] != '') {
+            if (isset($criterionData['id'])) {
                 // Update existing criteria
-                Criteria::where('id', $criterionData['id'])
-                    ->update([
-                        'name' => $criterionData['name'],
-                        'percentage' => $criterionData['percentage']
-                    ]);
+                $criterion = Criteria::find($criterionData['id']);
+                $criterion->update($criterionData);
             } else {
-                // Add new criteria
+                // Create new criteria
                 $competition->criteria()->create($criterionData);
             }
         }
 
-        // Delete criteria that were removed
-        $existingCriteriaIds = collect($request->criteria)->pluck('id')->filter();
-        Criteria::where('competition_id', $competition->id)
-            ->whereNotIn('id', $existingCriteriaIds)
-            ->delete();
-
-        return redirect()->route('admin.competitions.edit', $competition->id)->with('success', 'Competition updated successfully');
+        return redirect()->route('admin.competitions.index')->with('success', 'Competition updated successfully.');
     }
+
 
 
     public function destroy(Competition $competition)

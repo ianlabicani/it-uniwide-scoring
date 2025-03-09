@@ -12,6 +12,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     })->name('dashboard');
 
     Route::post('/users/add-judge', [UserController::class, 'addJudge'])->name('users.addJudge');
+    Route::post('/users/add-contestant', [UserController::class, 'addContestant'])->name('users.addContestant');
     Route::resource('users', UserController::class);
     Route::resource('competitions', CompetitionController::class);
 

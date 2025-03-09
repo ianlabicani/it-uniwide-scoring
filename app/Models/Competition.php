@@ -44,4 +44,11 @@ class Competition extends Model
         return $this->hasMany(Criteria::class);
     }
 
+    public function contestants()
+    {
+        return $this->belongsToMany(User::class, 'competition_contestant')
+            ->withTimestamps();
+    }
+
+
 }
