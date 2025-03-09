@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
 class Competition extends Model
 {
@@ -21,6 +22,13 @@ class Competition extends Model
         'location',
         'description',
     ];
+
+    protected $dates = ['date']; // This will cast your date as a Carbon instance
+
+    public function getFormattedDateAttribute()
+    {
+        return Carbon::parse($this->date)->format('F d, Y');
+    }
 
     /**
      * The judges that belong to the competition.
