@@ -11,8 +11,8 @@ class CompetitionController extends Controller
 {
     public function index()
     {
-        $judge = auth()->user();
-        $competitions = $judge->competitions;
+        $user = auth()->user();
+        $competitions = $user->judgeCompetitions;
 
         return view('judge.competitions.index', compact('competitions'));
     }

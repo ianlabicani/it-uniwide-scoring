@@ -51,7 +51,13 @@ class User extends Authenticatable
         return $this->belongsToMany(Role::class);
     }
 
-    public function competitions()
+    public function judgeCompetitions()
+    {
+        return $this->belongsToMany(Competition::class, 'competition_judge')
+            ->withTimestamps();
+    }
+
+    public function contestantCompetitions()
     {
         return $this->belongsToMany(Competition::class, 'competition_contestant')
             ->withTimestamps();
