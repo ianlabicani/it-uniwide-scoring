@@ -12,13 +12,4 @@ export default defineConfig({
         strictPort: true,
         https: true, // 👈 Force HTTPS for Vite assets
     },
-    build: {
-        manifest: true,
-        outDir: "public/build",
-        rollupOptions: {
-            output: {
-                publicPath: process.env.APP_URL + "/build/",
-            },
-        },
-    },
 });
