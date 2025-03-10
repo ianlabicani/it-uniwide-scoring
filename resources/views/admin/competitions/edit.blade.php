@@ -89,9 +89,6 @@
         </form>
     </div>
 
-@endsection
-
-@push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             let criteriaIndex = {{ $competition->criteria->count() }};
@@ -99,19 +96,19 @@
             document.getElementById('add-criteria').addEventListener('click', function () {
                 const container = document.getElementById('criteria-container');
                 const newCriteria = `
-                        <div class="criteria-item">
-                            <div class="input-group mb-2">
-                                <input type="hidden" name="criteria[${criteriaIndex}][id]" value="">
-                                <input type="text" name="criteria[${criteriaIndex}][name]" class="form-control"
-                                    placeholder="Criteria Name" required>
-                                <input type="number" name="criteria[${criteriaIndex}][percentage]" class="form-control"
-                                    placeholder="Percentage" required>
-                                <button type="button" class="btn btn-danger remove-criteria">
-                                    <i class="fas fa-trash"></i>
-                                </button>
+                            <div class="criteria-item">
+                                <div class="input-group mb-2">
+                                    <input type="hidden" name="criteria[${criteriaIndex}][id]" value="">
+                                    <input type="text" name="criteria[${criteriaIndex}][name]" class="form-control"
+                                        placeholder="Criteria Name" required>
+                                    <input type="number" name="criteria[${criteriaIndex}][percentage]" class="form-control"
+                                        placeholder="Percentage" required>
+                                    <button type="button" class="btn btn-danger remove-criteria">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-                    `;
+                        `;
                 container.insertAdjacentHTML('beforeend', newCriteria);
                 criteriaIndex++;
             });
@@ -123,4 +120,5 @@
             });
         });
     </script>
-@endpush
+@endsection
+

@@ -56,8 +56,14 @@ class CompetitionController extends Controller
         // Create the competition
         $competition = Competition::create($request->only('name', 'date', 'location', 'description'));
 
+        $criteria = $request->criteria;
+
+        if (!$criteria) {
+            $criteria = [];
+        }
+
         // Create the criteria
-        foreach ($request->criteria as $criterion) {
+        foreach ($criteria as $criterion) {
             $competition->criteria()->create($criterion);
         }
 
@@ -94,8 +100,15 @@ class CompetitionController extends Controller
         // Sync contestants
         $competition->contestants()->sync($request->contestants);
 
+        $criteria = $request->criteria;
+
+        if (!$criteria) {
+            $criteria = [];
+        }
+
+
         // Update or create criteria
-        foreach ($request->criteria as $criterionData) {
+        foreach ($criteria as $criterionData) {
             if (isset($criterionData['id'])) {
                 // Update existing criteria
                 $criterion = Criteria::find($criterionData['id']);

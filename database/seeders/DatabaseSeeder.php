@@ -19,22 +19,11 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             RoleSeeder::class,
+            UserSeeder::class,
+            CompetitionSeeder::class
         ]);
 
-        $roles = Role::whereIn('name', ['admin', 'judge'])->get()->keyBy('name');
 
-        $admin = User::create([
-            'name' => 'Admin User',
-            'email' => 'admin@example.com',
-            'password' => Hash::make('password'),
-        ]);
-        $admin->roles()->attach($roles['admin']->id, ['created_at' => now(), 'updated_at' => now()]);
-
-        $judge1 = User::factory()->create([
-            'name' => 'judge1',
-            'email' => 'judge1@example.com',
-        ]);
-        $judge1->roles()->attach($roles['judge']->id, ['created_at' => now(), 'updated_at' => now()]);
 
     }
 }

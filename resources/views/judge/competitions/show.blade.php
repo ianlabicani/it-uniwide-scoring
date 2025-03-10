@@ -11,12 +11,20 @@
                     <strong>Date:</strong> {{ $competition->formatted_date }}<br>
                     <strong>Location:</strong> {{ $competition->location }}<br>
                     <strong>Description:</strong> {{ $competition->description ?? 'No description provided.' }}<br>
-                    <strong>Status:</strong>
-                    <span class="badge bg-warning">Not Yet Judged</span>
                 </p>
             </div>
         </div>
         <h5 class="mt-4">Judges</h5>
+        @php
+            $judgeCount = $competition->judges->count();
+            $allJudgesDone = $judgeCount > 0 && $competition->scores()
+                ->where('judge_id', auth()->id())
+                ->select('user_id')
+                ->groupBy('user_id')
+                ->havingRaw('COUNT(criteria_id) = ?', [$competition->criteria->count()])
+                ->count() == $competition->contestants->count();
+        @endphp
+
         @if($competition->judges->isEmpty())
             <p>No judges assigned yet.</p>
         @else
@@ -37,6 +45,11 @@
 
                         // Check if the judge has scored all contestants
                         $hasCompleted = $totalContestants > 0 && $judgedCount == $totalContestants;
+
+                        if ($hasCompleted) {
+                            $judgedCount--;
+                        }
+
                     @endphp
 
                     <li class="list-group-item {{ $hasCompleted ? 'list-group-item-success' : '' }}">
@@ -59,69 +72,117 @@
             <p>No contestants registered yet.</p>
         @else
             @php
-                // Calculate total scores for each contestant
-                $contestantScores = $competition->contestants->map(function ($contestant) use ($competition) {
-                    $totalScore = $competition->scores()
-                        ->where('user_id', $contestant->id)
-                        ->sum('score');
+                // Count total contestants
+                $totalContestants = $competition->contestants->count();
 
-                    // Count only the judges who actually scored this contestant
-                    $totalJudges = $competition->scores()
-                        ->where('user_id', $contestant->id)
-                        ->count();
+                // Count the number of judges who have completed scoring for all contestants
+                $judgesCompleted = $competition->judges->filter(function ($judge) use ($competition, $totalContestants) {
+                    $scoredContestants = $competition->scores()
+                        ->where('judge_id', $judge->id)
+                        ->distinct('user_id')
+                        ->count('user_id');
+                    return $scoredContestants == $totalContestants;
+                })->count();
 
-                    // Properly calculate the weighted score across the judges who scored
-                    $weightedScore = $totalJudges > 0 ? $totalScore / $totalJudges : 0;
-
-                    return [
-                        'contestant' => $contestant,
-                        'totalScore' => $weightedScore
-                    ];
-                });
-
-                // Sort the contestants by total score in descending order
-                $rankedContestants = $contestantScores->sortByDesc('totalScore')->values();
+                // Check if all judges have completed their evaluations
+                $allJudgesDone = $judgesCompleted == $competition->judges->count();
             @endphp
 
-            <ul class="list-group">
-                @foreach($rankedContestants as $index => $entry)
-                    @php
-                        $contestant = $entry['contestant'];
-                        $totalScore = $entry['totalScore'];
-                        $rank = $index + 1;
-
-                        // Check if the judge already evaluated this contestant
-                        $alreadyScored = $competition->scores()
+            @if ($allJudgesDone)
+                @php
+                    // Calculate total scores for each contestant
+                    $contestantScores = $competition->contestants->map(function ($contestant) use ($competition) {
+                        $totalScore = $competition->scores()
                             ->where('user_id', $contestant->id)
-                            ->where('judge_id', auth()->id())
-                            ->exists();
-                    @endphp
+                            ->sum('score');
 
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <div>
-                            <strong>#{{ $rank }} - {{ $contestant->name }}</strong>
-                            <br>
-                            <small class="text-muted">
-                                <strong>Total Weighted Score:</strong> {{ number_format($totalScore, 2) }}
-                            </small>
-                        </div>
+                        // Count only the judges who actually scored this contestant
+                        $totalJudges = $competition->scores()
+                            ->where('user_id', $contestant->id)
+                            ->count();
 
-                        @if(!$alreadyScored)
-                            <a href="{{ route('judge.competitions.evaluate', [$competition->id, $contestant->id]) }}"
-                                class="btn btn-primary btn-sm">
-                                Evaluate
-                            </a>
-                        @else
-                            <a href="{{ route('judge.competitions.view-scores', [$competition->id, $contestant->id]) }}"
-                                class="btn btn-success btn-sm">
-                                View Scores
-                            </a>
-                        @endif
-                    </li>
-                @endforeach
-            </ul>
+                        // Properly calculate the weighted score across the judges who scored
+                        $weightedScore = $totalJudges > 0 ? $totalScore / $totalJudges : 0;
 
+                        return [
+                            'contestant' => $contestant,
+                            'totalScore' => $weightedScore
+                        ];
+                    });
+
+                    // Sort the contestants by total score in descending order
+                    $rankedContestants = $contestantScores->sortByDesc('totalScore')->values();
+                @endphp
+
+                <ul class="list-group">
+                    @foreach($rankedContestants as $index => $entry)
+                        @php
+                            $contestant = $entry['contestant'];
+                            $totalScore = $entry['totalScore'];
+                            $rank = $index + 1;
+
+                            // Check if the judge already evaluated this contestant
+                            $alreadyScored = $competition->scores()
+                                ->where('user_id', $contestant->id)
+                                ->where('judge_id', auth()->id())
+                                ->exists();
+                        @endphp
+
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>#{{ $rank }} - {{ $contestant->name }}</strong>
+                                <br>
+                                <small class="text-muted">
+                                    <strong>Total Weighted Score:</strong> {{ number_format($totalScore, 2) }}
+                                </small>
+                            </div>
+
+                            @if($alreadyScored)
+                                <a href="{{ route('judge.competitions.view-scores', [$competition->id, $contestant->id]) }}"
+                                    class="btn btn-success btn-sm">
+                                    View Scores
+                                </a>
+                            @endif
+                        </li>
+                    @endforeach
+                </ul>
+            @else
+                <p class="text-muted">
+                    📢 Waiting for all judges to complete their evaluations.
+                    Scores and rankings will appear once all judges have evaluated every contestant.
+                </p>
+
+                <ul class="list-group">
+                    @foreach($competition->contestants as $contestant)
+                        @php
+                            // Check if the judge already evaluated this contestant
+                            $alreadyScored = $competition->scores()
+                                ->where('user_id', $contestant->id)
+                                ->where('judge_id', auth()->id())
+                                ->exists();
+                        @endphp
+
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>{{ $contestant->name }}</strong>
+                            </div>
+                            @if(!$alreadyScored)
+                                <a href="{{ route('judge.competitions.evaluate', [$competition->id, $contestant->id]) }}"
+                                    class="btn btn-primary btn-sm">
+                                    Evaluate
+                                </a>
+                            @else
+                                <a href="{{ route('judge.competitions.view-scores', [$competition->id, $contestant->id]) }}"
+                                    class="btn btn-success btn-sm">
+                                    View Scores
+                                </a>
+                            @endif
+                        </li>
+                    @endforeach
+                </ul>
+            @endif
         @endif
+
 
 
         <a href="{{ route('judge.competitions.index') }}" class="btn btn-secondary mt-3">

@@ -145,4 +145,56 @@
             </form>
         </div>
     </div>
+
+
+    <!-- ✅ DELETE CONFIRMATION MODAL -->
+    <div class="modal fade" id="deleteJudgeModal" tabindex="-1" aria-labelledby="deleteJudgeModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <form id="deleteJudgeForm" method="POST">
+                @csrf
+                @method('DELETE')
+                <div class="modal-content">
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title" id="deleteJudgeModalLabel">
+                            <i class="fas fa-trash"></i> Confirm Delete
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        Are you sure you want to delete <strong id="judgeName"></strong>?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            Cancel
+                        </button>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash"></i> Confirm Delete
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
 @endsection
+
+    @section('scripts')
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const deleteJudgeModal = document.getElementById('deleteJudgeModal');
+                const deleteJudgeForm = document.getElementById('deleteJudgeForm');
+                const judgeNameText = document.getElementById('judgeName');
+
+                deleteJudgeModal.addEventListener('show.bs.modal', function (event) {
+                    const button = event.relatedTarget;
+                    const userId = button.getAttribute('data-user-id');
+                    const userName = button.getAttribute('data-user-name');
+
+                    // ✅ Update the modal text
+                    judgeNameText.textContent = userName;
+
+                    // ✅ Update the form action
+                    deleteJudgeForm.action = `/admin/users/${userId}`;
+                });
+            });
+        </script>
+    @endsection
