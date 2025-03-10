@@ -9,7 +9,6 @@ export default defineConfig({
         }),
     ],
     server: {
-        strictPort: true,
         https: true, // 👈 Force HTTPS for Vite assets
     },
 });
