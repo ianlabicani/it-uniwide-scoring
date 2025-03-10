@@ -16,17 +16,43 @@
                 </p>
             </div>
         </div>
-
         <h5 class="mt-4">Judges</h5>
         @if($competition->judges->isEmpty())
             <p>No judges assigned yet.</p>
         @else
             <ul class="list-group">
                 @foreach($competition->judges as $judge)
-                    <li class="list-group-item">{{ $judge->name }}</li>
+                    @php
+                        // Get the total number of contestants in this competition
+                        $totalContestants = $competition->contestants->count();
+
+                        // Get the number of contestants this judge has scored in THIS competition
+                        $judgedCount = $competition->scores()
+                            ->where('judge_id', $judge->id)
+                            ->select('user_id')
+                            ->groupBy('user_id')
+                            ->havingRaw('COUNT(criteria_id) = ?', [$competition->criteria->count()])
+                            ->count();
+
+
+                        // Check if the judge has scored all contestants
+                        $hasCompleted = $totalContestants > 0 && $judgedCount == $totalContestants;
+                    @endphp
+
+                    <li class="list-group-item {{ $hasCompleted ? 'list-group-item-success' : '' }}">
+                        {{ $judge->name }}
+                        @if($hasCompleted)
+                            <span class="badge bg-success ms-2">Completed</span>
+                        @else
+                            <span class="badge bg-warning ms-2">Pending</span>
+                        @endif
+                    </li>
                 @endforeach
             </ul>
         @endif
+
+
+
 
         <h5 class="mt-4">Contestants and Ranking</h5>
         @if($competition->contestants->isEmpty())
@@ -39,9 +65,17 @@
                         ->where('user_id', $contestant->id)
                         ->sum('score');
 
+                    // Count only the judges who actually scored this contestant
+                    $totalJudges = $competition->scores()
+                        ->where('user_id', $contestant->id)
+                        ->count();
+
+                    // Properly calculate the weighted score across the judges who scored
+                    $weightedScore = $totalJudges > 0 ? $totalScore / $totalJudges : 0;
+
                     return [
                         'contestant' => $contestant,
-                        'totalScore' => $totalScore
+                        'totalScore' => $weightedScore
                     ];
                 });
 
@@ -67,13 +101,8 @@
                         <div>
                             <strong>#{{ $rank }} - {{ $contestant->name }}</strong>
                             <br>
-                            @php
-                                $criteriaCount = $competition->criteria->count();
-                                $averageScore = $criteriaCount > 0 ? $totalScore / $criteriaCount : 0;
-                            @endphp
-
                             <small class="text-muted">
-                                <strong>Total Score:</strong> {{ number_format($averageScore, 2) }}
+                                <strong>Total Weighted Score:</strong> {{ number_format($totalScore, 2) }}
                             </small>
                         </div>
 
@@ -91,7 +120,9 @@
                     </li>
                 @endforeach
             </ul>
+
         @endif
+
 
         <a href="{{ route('judge.competitions.index') }}" class="btn btn-secondary mt-3">
             Back to Competitions
