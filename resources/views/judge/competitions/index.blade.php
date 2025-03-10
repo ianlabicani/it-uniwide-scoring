@@ -19,9 +19,9 @@
                                 <i class="fas fa-map-marker-alt"></i> {{ $competition->location }}
                             </small>
                         </div>
-                        {{-- <a href="{{ route('judge.evaluations.create', $competition->id) }}" class="btn btn-primary">
-                            <i class="fas fa-star"></i> Evaluate
-                        </a> --}}
+                        <a href="{{ route('judge.competitions.show', $competition->id) }}" class="btn btn-primary btn-sm">
+                            Show
+                        </a>
                     </div>
                 @endforeach
             </div>

@@ -17,6 +17,14 @@ class CompetitionController extends Controller
         return view('judge.competitions.index', compact('competitions'));
     }
 
+    public function show($id)
+    {
+        $competition = Competition::with(['judges', 'contestants'])->findOrFail($id);
+
+        return view('judge.competitions.show', compact('competition'));
+    }
+
+
 
     public function create()
     {

@@ -50,5 +50,10 @@ class Competition extends Model
             ->withTimestamps();
     }
 
+    public function scores()
+    {
+        return $this->hasMany(Score::class);
+    }
+
 
 }
